@@ -7,24 +7,39 @@
     aws_region: "ap-south-1"
     ecr_registry: "074416822896.dkr.ecr.ap-south-1.amazonaws.com"
     ecr_repository: "asik-service"
-    image_tag: "latest"
 
     container_name: "asik"
     container_port: 80
     host_port: 8080
 
+    app_version: "{{ image_tag | default('latest') }}"
+    rendered_html: "/opt/asik/index.html"
+
   tasks:
 
+    - name: Create ASIK application directory
+      ansible.builtin.file:
+        path: /opt/asik
+        state: directory
+        mode: "0755"
+
     - name: Login to AWS ECR
-      shell: |
+      ansible.builtin.shell: |
         aws ecr get-login-password --region {{ aws_region }} |
         docker login --username AWS --password-stdin {{ ecr_registry }}
       no_log: true
+      changed_when: false
 
-    - name: Pull ASIK image
+    - name: Pull ASIK image from ECR
       community.docker.docker_image:
-        name: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag }}"
+        name: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag | default('latest') }}"
         source: pull
+
+    - name: Render ASIK HTML template
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/httpd-index.html.j2"
+        dest: "{{ rendered_html }}"
+        mode: "0644"
 
     - name: Remove old ASIK container
       community.docker.docker_container:
@@ -34,19 +49,21 @@
     - name: Start new ASIK container
       community.docker.docker_container:
         name: "{{ container_name }}"
-        image: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag }}"
+        image: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag | default('latest') }}"
         state: started
         restart_policy: always
         published_ports:
           - "{{ host_port }}:{{ container_port }}"
+        volumes:
+          - "{{ rendered_html }}:/usr/local/apache2/htdocs/index.html:ro"
 
     - name: Verify ASIK container
       community.docker.docker_container_info:
         name: "{{ container_name }}"
       register: asik_container
 
-    - name: Check ASIK container status
-      assert:
+    - name: Check ASIK container is running
+      ansible.builtin.assert:
         that:
           - asik_container.container is not none
           - asik_container.container.State.Running
