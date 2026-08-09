@@ -1,14 +1,14 @@
 ---
-- name: Deploy ASIK Service
+- name: Deploy ASIK Aggregation Service
   hosts: ASIK
   become: true
 
   vars:
     aws_region: "ap-south-1"
     ecr_registry: "074416822896.dkr.ecr.ap-south-1.amazonaws.com"
-    ecr_repository: "asik-service"
+    ecr_repository: "asik-aggregation"
 
-    container_name: "asik"
+    container_name: "asik-aggregation"
     container_port: 80
     host_port: 8080
 
@@ -30,23 +30,23 @@
       no_log: true
       changed_when: false
 
-    - name: Pull ASIK image from ECR
+    - name: Pull ASIK Aggregation image from ECR
       community.docker.docker_image:
         name: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag | default('latest') }}"
         source: pull
 
-    - name: Render ASIK HTML template
+    - name: Render ASIK Aggregation HTML template
       ansible.builtin.template:
         src: "{{ playbook_dir }}/../templates/httpd-index.html.j2"
         dest: "{{ rendered_html }}"
         mode: "0644"
 
-    - name: Remove old ASIK container
+    - name: Remove old ASIK Aggregation container
       community.docker.docker_container:
         name: "{{ container_name }}"
         state: absent
 
-    - name: Start new ASIK container
+    - name: Start new ASIK Aggregation container
       community.docker.docker_container:
         name: "{{ container_name }}"
         image: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag | default('latest') }}"
@@ -57,15 +57,15 @@
         volumes:
           - "{{ rendered_html }}:/usr/local/apache2/htdocs/index.html:ro"
 
-    - name: Verify ASIK container
+    - name: Verify ASIK Aggregation container
       community.docker.docker_container_info:
         name: "{{ container_name }}"
       register: asik_container
 
-    - name: Check ASIK container is running
+    - name: Check ASIK Aggregation container is running
       ansible.builtin.assert:
         that:
           - asik_container.container is not none
           - asik_container.container.State.Running
-        success_msg: "ASIK container is running successfully"
-        fail_msg: "ASIK container failed to start"
+        success_msg: "ASIK Aggregation container is running successfully"
+        fail_msg: "ASIK Aggregation container failed to start"
