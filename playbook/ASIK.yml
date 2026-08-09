@@ -1,0 +1,54 @@
+---
+- name: Deploy ASIK Service
+  hosts: ASIK
+  become: true
+
+  vars:
+    aws_region: "ap-south-1"
+    ecr_registry: "074416822896.dkr.ecr.ap-south-1.amazonaws.com"
+    ecr_repository: "asik-service"
+    image_tag: "latest"
+
+    container_name: "asik"
+    container_port: 80
+    host_port: 8080
+
+  tasks:
+
+    - name: Login to AWS ECR
+      shell: |
+        aws ecr get-login-password --region {{ aws_region }} |
+        docker login --username AWS --password-stdin {{ ecr_registry }}
+      no_log: true
+
+    - name: Pull ASIK image
+      community.docker.docker_image:
+        name: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag }}"
+        source: pull
+
+    - name: Remove old ASIK container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        state: absent
+
+    - name: Start new ASIK container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ host_port }}:{{ container_port }}"
+
+    - name: Verify ASIK container
+      community.docker.docker_container_info:
+        name: "{{ container_name }}"
+      register: asik_container
+
+    - name: Check ASIK container status
+      assert:
+        that:
+          - asik_container.container is not none
+          - asik_container.container.State.Running
+        success_msg: "ASIK container is running successfully"
+        fail_msg: "ASIK container failed to start"

@@ -1,0 +1,54 @@
+---
+- name: Deploy IS Service
+  hosts: IS
+  become: true
+
+  vars:
+    aws_region: "ap-south-1"
+    ecr_registry: "074416822896.dkr.ecr.ap-south-1.amazonaws.com"
+    ecr_repository: "is-service"
+    image_tag: "latest"
+
+    container_name: "is"
+    container_port: 80
+    host_port: 8081
+
+  tasks:
+
+    - name: Login to AWS ECR
+      shell: |
+        aws ecr get-login-password --region {{ aws_region }} |
+        docker login --username AWS --password-stdin {{ ecr_registry }}
+      no_log: true
+
+    - name: Pull IS image
+      community.docker.docker_image:
+        name: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag }}"
+        source: pull
+
+    - name: Remove old IS container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        state: absent
+
+    - name: Start new IS container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ host_port }}:{{ container_port }}"
+
+    - name: Verify IS container
+      community.docker.docker_container_info:
+        name: "{{ container_name }}"
+      register: is_container
+
+    - name: Check IS container status
+      assert:
+        that:
+          - is_container.container is not none
+          - is_container.container.State.Running
+        success_msg: "IS container is running successfully"
+        fail_msg: "IS container failed to start"
