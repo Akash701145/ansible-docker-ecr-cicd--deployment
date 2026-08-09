@@ -1,0 +1,14 @@
+app_version: "1.3"
+previous_app_version: "1.2"
+
+nginx_version: "1.28"
+nginx_previous_version: "1.27.5"
+nginx_port: "8081"
+
+httpd_version: "2.4.66"
+httpd_previous_version: "2.4.63"
+httpd_port: "8082"
+
+redis_version: "7.4.4"
+redis_previous_version: "7.4.3"
+redis_port: "6379"

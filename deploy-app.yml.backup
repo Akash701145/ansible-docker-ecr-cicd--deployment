@@ -1,0 +1,140 @@
+---
+- name: Deploy applications
+  hosts: all
+  become: yes
+
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+
+    # =========================
+    # NGINX
+    # =========================
+
+    - name: Create Nginx application directory
+      file:
+        path: /opt/nginx-app
+        state: directory
+        mode: '0755'
+
+    - name: Create Nginx HTML page
+      template:
+        src: templates/index.html.j2
+        dest: /opt/nginx-app/index.html
+        mode: '0644'
+
+    - name: Pull Nginx image
+      community.docker.docker_image:
+        name: nginx
+        tag: "{{ nginx_version }}"
+        source: pull
+
+    - name: Remove old Nginx application
+      community.docker.docker_container:
+        name: myapp
+        state: absent
+
+    - name: Start Nginx application
+      community.docker.docker_container:
+        name: myapp
+        image: "nginx:{{ nginx_version }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ nginx_port }}:80"
+        volumes:
+          - /opt/nginx-app/index.html:/usr/share/nginx/html/index.html:ro
+
+
+    # =========================
+    # APACHE
+    # =========================
+
+    - name: Create Apache application directory
+      file:
+        path: /opt/httpd-app
+        state: directory
+        mode: '0755'
+
+    - name: Create Apache HTML page
+      template:
+        src: templates/httpd-index.html.j2
+        dest: /opt/httpd-app/index.html
+        mode: '0644'
+
+    - name: Pull Apache image
+      community.docker.docker_image:
+        name: httpd
+        tag: "{{ httpd_version }}"
+        source: pull
+
+    - name: Remove old Apache application
+      community.docker.docker_container:
+        name: httpd-app
+        state: absent
+
+    - name: Start Apache application
+      community.docker.docker_container:
+        name: httpd-app
+        image: "httpd:{{ httpd_version }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ httpd_port }}:80"
+        volumes:
+          - /opt/httpd-app/index.html:/usr/local/apache2/htdocs/index.html:ro
+
+
+    # =========================
+    # REDIS
+    # =========================
+
+    - name: Pull Redis image
+      community.docker.docker_image:
+        name: redis
+        tag: "{{ redis_version }}"
+        source: pull
+
+    - name: Remove old Redis application
+      community.docker.docker_container:
+        name: redis-app
+        state: absent
+
+    - name: Start Redis application
+      community.docker.docker_container:
+        name: redis-app
+        image: "redis:{{ redis_version }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ redis_port }}:6379"
+
+    # =========================
+    # HEALTH CHECKS
+    # =========================
+
+    - name: Check Nginx application
+      uri:
+        url: "http://localhost:{{ nginx_port }}"
+        status_code: 200
+      register: nginx_health
+      retries: 5
+      delay: 2
+      until: nginx_health.status == 200
+
+    - name: Check Apache application
+      uri:
+        url: "http://localhost:{{ httpd_port }}"
+        status_code: 200
+      register: httpd_health
+      retries: 5
+      delay: 2
+      until: httpd_health.status == 200
+
+    - name: Check Redis
+      command: docker exec redis-app redis-cli ping
+      register: redis_health
+      retries: 5
+      delay: 2
+      until: "'PONG' in redis_health.stdout"
