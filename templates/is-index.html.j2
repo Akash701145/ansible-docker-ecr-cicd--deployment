@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>IS_DLAT Service | DevOps Deployment | Version {{ image_tag | default('latest') }}</title>
+    <title>
+        IS Aggregation Service | Version {{ image_tag | default('latest') }}
+    </title>
 
     <style>
         body {
@@ -30,13 +32,30 @@
 
         h1 {
             font-size: 42px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .subtitle {
             font-size: 20px;
             color: #cbd5e1;
-            margin-bottom: 40px;
+            margin-bottom: 15px;
+        }
+
+        .version {
+            display: inline-block;
+            margin: 10px 0 30px 0;
+            padding: 10px 22px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .pipeline-title {
+            margin-top: 10px;
+            margin-bottom: 25px;
         }
 
         .pipeline {
@@ -45,7 +64,7 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 12px;
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
         .tool {
@@ -54,10 +73,16 @@
             border-radius: 12px;
             font-size: 16px;
             font-weight: bold;
+            transition: transform 0.2s ease;
+        }
+
+        .tool:hover {
+            transform: translateY(-3px);
         }
 
         .arrow {
             font-size: 24px;
+            color: #cbd5e1;
         }
 
         .footer {
@@ -78,7 +103,14 @@
             Automated CI/CD Deployment using Modern DevOps Tools
         </div>
 
-        <h2>⚙️ DevOps Deployment Pipeline</h2>
+        <!-- Dynamically displayed deployment version -->
+        <div class="version">
+            Version: v{{ image_tag | default('latest') }}
+        </div>
+
+        <h2 class="pipeline-title">
+            ⚙️ DevOps Deployment Pipeline
+        </h2>
 
         <div class="pipeline">
 
@@ -109,6 +141,8 @@
 
         <div class="footer">
             IS Aggregation Service | Automated Deployment
+            <br>
+            Deployed through Jenkins CI/CD Pipeline
         </div>
 
     </div>
