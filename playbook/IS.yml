@@ -1,4 +1,3 @@
----
 - name: Deploy IS Service
   hosts: IS
   become: true
@@ -8,7 +7,7 @@
     ecr_registry: "074416822896.dkr.ecr.ap-south-1.amazonaws.com"
     ecr_repository: "is-service"
 
-    container_name: "is"
+    container_name: "is-service"
     container_port: 80
     host_port: 8081
 
@@ -37,7 +36,7 @@
 
     - name: Render IS HTML template
       ansible.builtin.template:
-        src: "{{ playbook_dir }}/../templates/index.html.j2"
+        src: "{{ playbook_dir }}/../templates/is-index.html.j2"
         dest: "{{ rendered_html }}"
         mode: "0644"
 
@@ -55,7 +54,7 @@
         published_ports:
           - "{{ host_port }}:{{ container_port }}"
         volumes:
-          - "{{ rendered_html }}:/usr/share/nginx/html/index.html:ro"
+          - "{{ rendered_html }}:/usr/local/apache2/htdocs/index.html:ro"
 
     - name: Verify IS container
       community.docker.docker_container_info:
