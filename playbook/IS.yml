@@ -7,7 +7,7 @@
     ecr_registry: "074416822896.dkr.ecr.ap-south-1.amazonaws.com"
     ecr_repository: "is-service"
 
-    container_name: "is-service"
+    container_name: "is-dlat"
     container_port: 80
     host_port: 8081
 
