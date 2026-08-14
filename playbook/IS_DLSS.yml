@@ -5,7 +5,7 @@
   vars:
     aws_region: "ap-south-1"
     ecr_registry: "074416822896.dkr.ecr.ap-south-1.amazonaws.com"
-    ecr_repository: "is-comm"
+    ecr_repository: "is-ecomm"
 
     container_name: "is-ecomm"
     container_port: 80
