@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>IS Ecomm | DevOps Deployment | Version {{ image_tag | default('latest') }}</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a);
+            color: white;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 80px auto;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+        }
+
+        .version {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4ade80;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .tools {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .tool {
+            background: white;
+            color: #0f172a;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+
+        .pipeline {
+            font-size: 18px;
+            line-height: 2;
+            margin-top: 20px;
+        }
+
+        .success {
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        footer {
+            margin-top: 40px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🚀 ASIK Aggregation Service</h1>
+
+    <div class="subtitle">
+        Automated CI/CD Deployment using Modern DevOps Tools
+    </div>
+
+    <div class="version">
+        Version: v{{ image_tag | default('latest') }}
+    </div>
+
+    <div class="card">
+
+        <h2>⚙️ DevOps Deployment Pipeline</h2>
+
+        <div class="pipeline">
+            👨‍💻 VS Code
+            →
+            🐙 Git
+            →
+            🐙 GitHub
+            →
+            🔨 Jenkins
+            →
+            🐳 Docker
+            →
+            ☁️ AWS ECR
+            →
+            ⚙️ Ansible
+            →
+            🚀 Application Server
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>🛠️ Technologies Used</h2>
+
+        <div class="tools">
+
+            <div class="tool">VS Code</div>
+            <div class="tool">Git</div>
+            <div class="tool">GitHub</div>
+            <div class="tool">Jenkins</div>
+            <div class="tool">Docker</div>
+            <div class="tool">Ansible</div>
+            <div class="tool">AWS</div>
+            <div class="tool">Amazon ECR</div>
+            <div class="tool">Linux</div>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h2>🔄 CI/CD Workflow</h2>
+
+        <p>
+            Source code is developed in <strong>VS Code</strong> and
+            version-controlled using <strong>Git</strong>.
+        </p>
+
+        <p>
+            Code is pushed to <strong>GitHub</strong>, triggering the
+            <strong>Jenkins CI/CD pipeline</strong>.
+        </p>
+
+        <p>
+            Jenkins builds the application into a
+            <strong>Docker image</strong> and pushes it to
+            <strong>AWS Elastic Container Registry (ECR)</strong>.
+        </p>
+
+        <p>
+            <strong>Ansible</strong> then pulls the image from ECR,
+            removes the previous container, deploys the new container,
+            and verifies the deployment.
+        </p>
+
+        <p class="success">
+            ✅ Deployment Completed Successfully
+        </p>
+
+    </div>
+
+    <div class="card">
+
+        <h2>☁️ AWS Infrastructure</h2>
+
+        <p>
+            Hosted on <strong>AWS EC2</strong> with Docker-based application
+            deployment and <strong>Amazon ECR</strong> for container image
+            management.
+        </p>
+
+        <p>
+            The complete deployment process is automated through
+            Jenkins and Ansible.
+        </p>
+
+    </div>
+
+    <footer>
+        ASIK Aggregation Service | Automated DevOps CI/CD Pipeline
+        <br>
+        Git • GitHub • Jenkins • Docker • Ansible • AWS • ECR
+    </footer>
+
+</div>
+
+</body>
+</html>

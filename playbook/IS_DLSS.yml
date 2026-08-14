@@ -1,0 +1,70 @@
+- name: Deploy IS Service
+  hosts: IS
+  become: true
+
+  vars:
+    aws_region: "ap-south-1"
+    ecr_registry: "074416822896.dkr.ecr.ap-south-1.amazonaws.com"
+    ecr_repository: "is-comm"
+
+    container_name: "is-ecomm"
+    container_port: 80
+    host_port: 8082
+
+    app_version: "{{ image_tag | default('latest') }}"
+    rendered_html: "/opt/is/index.html"
+
+  tasks:
+
+    - name: Create IS application directory
+      ansible.builtin.file:
+        path: /opt/is
+        state: directory
+        mode: "0755"
+
+    - name: Login to AWS ECR
+      ansible.builtin.shell: |
+        aws ecr get-login-password --region {{ aws_region }} |
+        docker login --username AWS --password-stdin {{ ecr_registry }}
+      no_log: true
+      changed_when: false
+
+    - name: Pull IS image from ECR
+      community.docker.docker_image:
+        name: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag | default('latest') }}"
+        source: pull
+
+    - name: Render IS HTML template
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../templates/is-index.html.j2"
+        dest: "{{ rendered_html }}"
+        mode: "0644"
+
+    - name: Remove old IS container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        state: absent
+
+    - name: Start new IS container
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        image: "{{ ecr_registry }}/{{ ecr_repository }}:{{ image_tag | default('latest') }}"
+        state: started
+        restart_policy: always
+        published_ports:
+          - "{{ host_port }}:{{ container_port }}"
+        volumes:
+          - "{{ rendered_html }}:/usr/local/apache2/htdocs/index.html:ro"
+
+    - name: Verify IS container
+      community.docker.docker_container_info:
+        name: "{{ container_name }}"
+      register: is_container
+
+    - name: Check IS container is running
+      ansible.builtin.assert:
+        that:
+          - is_container.container is not none
+          - is_container.container.State.Running
+        success_msg: "IS container is running successfully"
+        fail_msg: "IS container failed to start"
